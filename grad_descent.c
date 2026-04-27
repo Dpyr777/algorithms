@@ -2,12 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <stdbool.h>
 #include "derivative.h"
 #include "grad_descent.h"
+#include "get_random_start_point.h"
 
-double get_random_start_point();
 
 void grad_descent(char* function){
+    
+    printf("Gradient descent!\n");
+
 #if 0
     char* derX = derivative(function, 'x');
     char* derY = derivative(function, 'y');
@@ -16,50 +20,73 @@ void grad_descent(char* function){
     printf("derX = 2 * x - 2 - 400 * x * y + 400 * x^3\n");
     printf("derY = 200 * y - 200 * x^2\n");
 
-    
+    // начальные координаты
     double xNew;
     double yNew;
 
+    // новые координаты
     double xOld;
     double yOld;
 
-    double f; 
+    // значение функции в начале и после шага
+    double fOld; 
+    double fNew;
 
+    // начальная длина шага
     double step = 0.001f;
-    double eps = 0.00001f;
+    // лимит изменения
+    double eps = 0.0001f;
+
+    // флаг врызва функции когда переменные переполняются или становятся не определенными
+    bool blowUp = false;
     for (int i = 0; i < 10; ++i){
-        xNew = get_random_start_point(); 
+        xNew = get_random_start_point(10, false); 
         printf("x0 = %f\n", xNew);
 
-        yNew = get_random_start_point();
+        yNew = get_random_start_point(10, false);
         printf("y0 = %f\n", yNew);
 
-        xOld = 0.0;
-        yOld = 0.0;
+        xOld = xNew + 1;
+        yOld = yNew + 1;
 
-        f = (1 - xNew) * (1 - xNew) + 100 * (yNew - xNew * xNew) * (yNew - xNew * xNew);
-        printf("minum function in points x = %.2f; y = %.2f  => f = %.2f\n", xNew, yNew, f);
+        fOld = (1 - xNew) * (1 - xNew) + 100 * (yNew - xNew * xNew) * (yNew - xNew * xNew);
+        printf("minum function in points x = %.2f; y = %.2f  => f = %f\n", xNew, yNew, fOld);
 
         while (fabs(xNew - xOld) > eps || fabs(yNew - yOld) > eps){
             xOld = xNew;
-            yOld= yNew;
+            yOld = yNew;
             xNew = xOld - step * (2 * xOld - 2 - 400 * xOld * yOld + 400 * powf(xOld, 3));  
             yNew = yOld - step * (200 * yOld - 200 * powf(xOld, 2));
-            f = (1 - xNew) * (1 - xNew) + 100 * (yNew - xNew * xNew) * (yNew - xNew * xNew);
-            //printf("minum function in points x = %.2f; y = %.2f  => f = %.8f\n", xNew, yNew, f);
-            if (fabs(xNew / xOld) > 5.0 || fabs(yNew / xOld) > 5.0){
-                printf("Blow-up\n");
+            fNew = (1 - xNew) * (1 - xNew) + 100 * (yNew - xNew * xNew) * (yNew - xNew * xNew);
+            //printf("minum function in points x = %.2f; y = %.2f  => f = %.8f\n", xNew, yNew, fNew);
+#if 1
+            // проверка на предел новых значений
+            if (isinf(xNew) || isnan(xNew) || isnan(yNew) || isnan(yNew)){ 
+                blowUp = true;
                 break;
             }
+
+            // проверяем на рост функции, если да то слишком большой шаг перепрыгнули минимум
+            if (fNew > fOld){
+                // уменьшаем шаг и лимит изменения;
+                step /= 2;
+                eps /= 2;
+                // повторяем спрошлой точки с уменьшенном шагом
+                xNew = xOld;
+                yNew = yOld;
+                xOld += 1;
+                yOld += 1;
+                continue;
+            }
+#endif
+            fOld = fNew;
         }
-        printf("minum function in points x = %.2f; y = %.2f  => f = %.4f\n", xNew, yNew, f);
+        if (blowUp == true){
+            printf("Blow-up\n");
+        } else {
+            printf("minum function in points x = %.2f; y = %.2f  => f = %.4f\n", xNew, yNew, fOld);
+        }
+        printf("--------------------------------------\n");
     }
-}
-double get_random_start_point(){
-    double point = 1.0f / (rand() % 10 + 1); 
-    if ((rand() & 1) == 0) {
-        point = -point;
-    }
-    return point; 
 }
 
