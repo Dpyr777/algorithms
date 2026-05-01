@@ -6,50 +6,57 @@
 #include "simulated_annealing.h"
 
 
-void simulated_annealing(char* function){
+void simulated_annealing(char* function, double xNew, double yNew){
     
     printf("Simulated annealing!\n");
-    double xNew = get_random_start_point(10, false);
-    double yNew = get_random_start_point(10, false);
 
-    double xOld;
-    double yOld;
-
-    double initialState = 1000;
+    double initialState = 5000;
     double finalState = 0.0001;
-
-    double startStep = 0.1;
 
     double currentState = initialState;
 
-    double fOld = (1 - xOld) * (1 - xOld) + 100 * (yOld - xOld * xOld) * (yOld - xOld * xOld); 
+    double fOld = (1 - xNew) * (1 - xNew) + 100 * (yNew - xNew * xNew) * (yNew - xNew * xNew); 
     double fNew;
-    double st;
-    double step; 
-
     printf("minum function in points x = %.2f; y = %.2f  => f = %f\n", xNew, yNew, fOld);
 
+    double xOld = xNew;
+    double yOld = yNew;
+
+    double stepStart = 1.0;
+    double step = stepStart;
+    int factor = 1;
+    double cooling = 0.995;
+
     while (currentState > finalState){
-        step = startStep * (currentState / initialState);
         // прибавляем или отнимаем шаг
-        st = (rand() & 1) ? -1 : 1;
-        xOld = xNew + step * st;
-        
-        st = (rand() & 1) ? -1 : 1;
-        yOld = yNew + step * st;
+        factor = (rand() & 1) ? -1 : 1; 
+        // выбираем рандомное направление по оси X или Y 
+        if (rand() & 1) {
+            xNew = xOld + (double)rand() / RAND_MAX * step * factor;
+        } else {
+            xNew = xOld + (double)rand() / RAND_MAX * step * factor;
+        }
+        fNew = (1 - xNew) * (1 - xNew) + 100 * (yNew - xNew * xNew) * (yNew - xNew * xNew); 
 
-        fNew = (1 - xOld) * (1 - xOld) + 100 * (yOld - xOld * xOld) * (yOld - xOld * xOld); 
+        // уменьшаем температуру(состояние) 
+        currentState *= cooling;
+        // уменьшаем шаг в зависимости от текущей температуры и её начальной.
+        step = stepStart * sqrt(currentState/initialState);
 
-        if (fNew > fOld){
-            double probability = exp((fOld - fNew)/initialState);
+        // Если функция выросла, принимаем решение принять или отвергнуть, .
+        if ((fNew - fOld) > 0){
+            // под exp отрицательное число:
+            // 1) Если стремится к нулю, то probability(вероятность) стремится к 1.0 (максимум)
+            // 2) Если отдаляется от нуля, то probabitity стремится к 0.0 (минимум)
+            double probability = exp((fOld - fNew)/currentState);
             if (probability < (double)rand() / RAND_MAX){
                 continue;
             }
-        }
-        currentState -= 0.01;
+        } 
         fOld = fNew;
-        xNew = xOld;
-        yNew = xOld;
+        xOld = xNew;
+        yOld = yNew;
     }
     printf("minum function in points x = %.2f; y = %.2f  => f = %f\n", xNew, yNew, fOld);
+    printf("--------------------------------------\n");
 }

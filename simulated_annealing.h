@@ -1,6 +1,6 @@
 #ifndef SIMULATED_ANNEALING_H
 #define SIMULATED_ANNEALING_H
 
-void simulated_annealing(char* function);
+void simulated_annealing(char* function, double xNew, double yNew);
 
 #endif

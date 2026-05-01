@@ -2,14 +2,12 @@
 #include <stdbool.h>
 
 double get_random_start_point(unsigned int limit, bool isInteger){
-    // для получения дробных чисел
-    double factor;
+    double point = 0.0;
     if (isInteger){
-        factor = 1.0;
+        point = rand() % (limit * 2 + 1) - limit; 
     } else {
-        factor = (double)rand() / RAND_MAX;
+        double factor = (double)rand() / RAND_MAX;
+        point = limit * 2 * factor - limit;
     }
-    double point = (rand() % (limit * 2 + 1)) * factor - limit;
-
     return point; 
 }
