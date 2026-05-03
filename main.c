@@ -5,6 +5,7 @@
 #include "grad_descent.h"
 #include "simulated_annealing.h"
 #include "get_random_start_point.h"
+#include "genetic_algorithm.h"
 
 int main(){
     srand(time(NULL));
@@ -14,15 +15,22 @@ int main(){
 #endif
     char* function = "(1 - x)^2 + 100 * (y - x^2)^2";
     printf("Function Rosenbrock -> f(x, y) = %s\n", function); 
-    double xNew = 0.0;
-    double yNew = 0.0;
+    double x0 = 0.0;
+    double y0 = 0.0;
+    double f = 0.0;
+    double fGrad;
+    double fSim;
+    double fGen;
     for (int i = 0; i < 10; ++i){
-        xNew = get_random_start_point(100, false); 
-        printf("x0 = %f\n", xNew);
-        yNew = get_random_start_point(100, false);
-        printf("y0 = %f\n", yNew);
-        grad_descent(function, xNew, yNew);
-        simulated_annealing(function, xNew, yNew);
+        x0 = get_random_start_point(10, false); 
+        y0 = get_random_start_point(10, false);
+        f = (1 - x0) * (1 - x0) + 100 * (y0 - x0 * x0) * (y0 - x0 * x0); 
+        printf("Value function in starting points x0 = %.2f; y0 = %.2f  => f = %f\n", x0, y0, f);
+        printf("--------------------------------------\n");
+        fGrad = grad_descent(function, x0, y0);
+        fSim = simulated_annealing(function, x0, y0);
+        fGen = genetic_algorithm(function, x0, y0);
+        printf("--Function--\t\t --Value--\nGradient descent:\t %f\nSimulated annealing:\t %f\nGenetic algorithm:\t %f\n", fGrad, fSim, fGen); 
         printf("======================================\n");
     }
     
