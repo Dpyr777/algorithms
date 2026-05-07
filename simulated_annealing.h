@@ -1,6 +1,0 @@
-#ifndef SIMULATED_ANNEALING_H
-#define SIMULATED_ANNEALING_H
-
-double simulated_annealing(char* function, double xNew, double yNew);
-
-#endif

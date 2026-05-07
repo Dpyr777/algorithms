@@ -1,5 +1,7 @@
-
 #ifndef DERIVATIVE_H
 #define DERIVATIVE_H
-char* derivative(char* function, char symbol);
+#include "types.h"
+
+Point derivative(double x, double y, int choice);
+
 #endif
